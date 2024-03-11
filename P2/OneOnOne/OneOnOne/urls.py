@@ -31,4 +31,5 @@ urlpatterns = [
     path("calendars/", include("Calendars.urls")),
     path("contacts/", include("Contacts.urls")),
     # path("user/", include("User.urls")),
+    path("timeslot/", include("TimeSlots.urls"))
 ]
