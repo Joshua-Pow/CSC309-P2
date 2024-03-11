@@ -34,7 +34,7 @@ from .models import TimeSlot
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @permission_classes([permissions.AllowAny])   
-class AllTimeSlotView():
+class AllTimeSlotView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
@@ -50,7 +50,7 @@ class AllTimeSlotView():
     
     
 @permission_classes([permissions.AllowAny])   
-class CreateTimeSlotView():
+class CreateTimeSlotView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):

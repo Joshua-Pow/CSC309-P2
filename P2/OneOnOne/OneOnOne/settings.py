@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "Calendars",
     "drf_spectacular",
     "Contacts",
+    "TimeSlots",
 ]
 
 MIDDLEWARE = [
