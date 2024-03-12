@@ -355,7 +355,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/contacts/friends/",
+					"raw": "http://127.0.0.1:8000/contacts/incoming/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -366,7 +366,7 @@
 					"port": "8000",
 					"path": [
 						"contacts",
-						"friends",
+						"incoming",
 						""
 					]
 				}
@@ -490,7 +490,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"PeterParker\"\r\n}\r\n",
+					"raw": "{\r\n    \"username\": \"Vision\"\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -498,7 +498,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8000/contacts/add/",
+					"raw": "http://127.0.0.1:8000/contacts/accept/",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -509,7 +509,7 @@
 					"port": "8000",
 					"path": [
 						"contacts",
-						"add",
+						"accept",
 						""
 					]
 				}
@@ -560,7 +560,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"PeterParker\"\r\n}\r\n",
+					"raw": "{\r\n    \"username\": \"Vision\"\r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"

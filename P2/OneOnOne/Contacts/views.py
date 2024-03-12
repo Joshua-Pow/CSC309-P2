@@ -26,10 +26,8 @@ class ContactViewSet(viewsets.ModelViewSet):
         The user cannot add themselves.
         If the contact already exists, the request will be rejected.
         If the contact is blocked, the request will be rejected.
-        If the contact is pending, the request will be rejected.
-        If the contact is already a friend, the request will be rejected.
         If the user is not found, the request will be rejected.
-        If the user is found, the request will be accepted and the contact will be added to the user's contact list.
+        If the user is found, the request will be accepted and the contact will be added to the user's contact list with a status of pending.
         """
         userA = request.user
         userB_username = request.data.get("username", None)
@@ -55,6 +53,9 @@ class ContactViewSet(viewsets.ModelViewSet):
     #get nicely formatted query of all of the logged in users friends
     @action(detail=False, methods=['get'], url_path='friends')
     def friends(self, request):
+        """
+        Get a list of all friends of the current user.
+        """
         user = request.user
         contacts = Contact.objects.filter(Q(userA=user)|Q(userB=user),status=1)
         #clean up data to easier to work with in frontend
@@ -74,7 +75,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='incoming')
     def incoming(self, request):
         """
-        Get a list of all incoming friend requests for the current user.
+        Get a list of all incoming pending friend requests for the current user.
         """
         user = request.user
         contacts = Contact.objects.filter(userB=user, status=2)
@@ -90,7 +91,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='outgoing')
     def outgoing(self, request):
         """
-        Get a list of all outgoing friend requests for the current user.
+        Get a list of all outgoing pending friend requests for the current user.
         """
         user = request.user
         contacts = Contact.objects.filter(userA=user, status=2)
@@ -108,7 +109,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], url_path='accept')
     def accept(self, request):
         """
-        Accept a friend request from another user.
+        Accept an incoming pending friend request from another user.
         """
         userB_username = request.data.get("username", None)
         if not userB_username:
@@ -133,7 +134,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], url_path='reject')
     def reject(self, request):
         """
-        Reject a friend request from another user.
+        Reject an incoming pending friend request from another user.
         """
         userB_username = request.data.get("username", None)
         if not userB_username:
@@ -157,6 +158,9 @@ class ContactViewSet(viewsets.ModelViewSet):
     #if they have no relationship it makes a new one that is blocked
     @action(detail=False, methods=['post'], url_path='block')
     def block(self, request):
+        """
+        Current user blocks another user.
+        """
         userB_username = request.data.get('username', None)
         if not userB_username:
             return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -172,6 +176,9 @@ class ContactViewSet(viewsets.ModelViewSet):
     #logged in user unblocks a blocked user, deleting their relationship
     @action(detail=False, methods=['post'], url_path='unblock')
     def unblock(self, request):
+        """
+        Current user unblocks an existing blocked user.
+        """
         userB_username = request.data.get('username', None)
         if not userB_username:
             return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -186,6 +193,9 @@ class ContactViewSet(viewsets.ModelViewSet):
     #logged in user unadds a non-blocked user, deleting their relationship
     @action(detail=False, methods=['post'], url_path='unadd')
     def unadd(self, request):
+        """
+        Current user unadds an existing blocked user.
+        """
         userB_username = request.data.get('username', None)
         if not userB_username:
             return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -201,6 +211,9 @@ class ContactViewSet(viewsets.ModelViewSet):
     #will be used to help autofill search bars etc. for when adding new friends
     @action(detail=False, methods=['get'], url_path='search')
     def search(self, request):
+        """
+        Get list of all people other than the current user.
+        """
         users = User.objects.exclude(id=request.user.id)
         users_cleaned = [{"id": user.id, "username": user.username} for user in users]
         return Response(users_cleaned)
