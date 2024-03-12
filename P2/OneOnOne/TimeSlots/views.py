@@ -33,7 +33,10 @@ from .models import TimeSlot
 #             )
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@permission_classes([permissions.AllowAny])   
+@extend_schema(
+    methods=["get"],
+    request=TimeSlotSerializer,
+)
 class AllTimeSlotView(APIView):
     permission_classes = [permissions.AllowAny]
 
