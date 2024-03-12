@@ -3,13 +3,13 @@ from .models import TimeSlot
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
-    date = serializers.DateField(required=True, format="%Y-%m-%d")
     start_time = serializers.TimeField(required=True, format="%H:%M")
     end_time = serializers.TimeField(required=True, format="%H:%M")
 
     class Meta:
         model = TimeSlot
-        fields = ["date", "start_time", "end_time"]
+        fields = ["id", "start_time", "end_time"]
+        extra_kwargs = {"day": {"write_only": True, "required": False}}
 
     def validate(self, data):
         if data["start_time"] > data["end_time"]:
@@ -20,9 +20,5 @@ class TimeSlotSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        timeslot = TimeSlot.objects.create(
-            date = validated_data["date"],
-            start_time = validated_data["start_time"],
-            end_time = validated_data["end_time"]
-        )
+        timeslot = TimeSlot.objects.create(**validated_data)
         return timeslot

@@ -4,6 +4,7 @@ from .serializers import CalendarSerializer
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.utils import OpenApiResponse
+from rest_framework.exceptions import PermissionDenied
 
 
 @extend_schema(
@@ -14,6 +15,9 @@ class CalendarListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CalendarSerializer
     queryset = Calendar.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
 
     @extend_schema(
         description="List all calendars",
@@ -42,6 +46,30 @@ class CalendarRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView
     permission_classes = [IsAuthenticated]
     serializer_class = CalendarSerializer
     queryset = Calendar.objects.all()
+
+    def get_queryset(self):
+        """
+        This view returns a list of all the calendars for the currently authenticated user.
+        """
+        user = self.request.user
+        if user.is_authenticated:
+            return Calendar.objects.filter(creator=user)
+        else:
+            raise PermissionDenied("You do not have permission to view this calendar.")
+
+    def update(self, request, *args, **kwargs):
+        calendar = self.get_object()
+        if calendar.creator != request.user:
+            raise PermissionDenied("You do not have permission to edit this calendar.")
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        calendar = self.get_object()
+        if calendar.creator != request.user:
+            raise PermissionDenied(
+                "You do not have permission to delete this calendar."
+            )
+        return super().destroy(request, *args, **kwargs)
 
     @extend_schema(
         description="Retrieve a calendar",
