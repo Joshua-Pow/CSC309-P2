@@ -28,5 +28,6 @@ urlpatterns = [
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("admin/", admin.site.urls),
     path("auth/", include("Auth.urls")),
+    path("contacts/", include("Contacts.urls")),
     # path("user/", include("User.urls")),
 ]
