@@ -7,62 +7,63 @@ from rest_framework.decorators import permission_classes
 from drf_spectacular.utils import OpenApiResponse
 from .serializers import TimeSlotSerializer
 from .models import TimeSlot
+from rest_framework import generics
 
+@extend_schema(
+    methods=["post"],
+    request=TimeSlotSerializer,
+)
+class TimeSlotListCreateAPIView(APIView):
+    serializer_class = TimeSlotSerializer
+    queryset = TimeSlot.objects.all()
 
-# @extend_schema(
-#     methods=["post"],
-#     request=TimeSlotSerializer,
-#     description="Create a new time slot",
-#     responses={
-#         status.HTTP_201_CREATED: OpenApiResponse(
-#             description="Timeslot created successfully"
-#         ),
-#         status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Invalid data"),
-#     },
-# )
-# @permission_classes([permissions.AllowAny])
-# class RegisterUserAPIView(APIView):
+    @extend_schema(
+        description="Create a new time slot",
+        responses={201: OpenApiResponse(response=TimeSlotSerializer)},
+    )
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+@extend_schema(
+    methods=["get", "put", "delete"],
+    request=TimeSlotSerializer,
+)
+class TimeSlotRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = TimeSlotSerializer
+    queryset = TimeSlot.objects.all()
+
+    @extend_schema(
+        description="Retrieve a time slot",
+        responses={200: OpenApiResponse(response=TimeSlotSerializer)},
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        description="Update a time slot",
+        responses={204: OpenApiResponse(response=TimeSlotSerializer)},
+    )
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    @extend_schema(
+        description="Delete a time slot",
+        responses={204: OpenApiResponse(response=TimeSlotSerializer)},
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    
+# @permission_classes([permissions.AllowAny])   
+# class CreateTimeSlotView(APIView):
 #     permission_classes = [permissions.AllowAny]
 
 #     def post(self, request):
-#         serializer = UserSerializer(data=request.data)
+#         # need to insert calendar and owner to data
+#         # request.data
+#         serializer = TimeSlotSerializer(data = request.data)
 #         if serializer.is_valid():
 #             serializer.save()
 #             return Response(
-#                 {"message": "User created successfully"}, status=status.HTTP_201_CREATED
+#                 {"message": "Time slot created successfully"}, status=status.HTTP_201_CREATED
 #             )
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@extend_schema(
-    methods=["get"],
-    request=TimeSlotSerializer,
-)
-class AllTimeSlotView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def get(self, request, *args, **kwargs):
-        # calendar = Calendar.objects.get(id=kwargs['calendar_id'])
-        # timeslots = calendar.timeslot_set.all().filter(calendar = calendar)
-        #   OR
-        # timeslots = TimeSlot.objects.all().filter(calendar=calendar)
-        # need a try/except for two queries above
-        # return Response(
-        #       {"message": timeslots, status=status.HTTP_200_CREATED
-        # )
-        pass
-    
-    
-@permission_classes([permissions.AllowAny])   
-class CreateTimeSlotView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        # need to insert calendar and owner to data
-        # request.data
-        serializer = TimeSlotSerializer(data = request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {"message": "Time slot created successfully"}, status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

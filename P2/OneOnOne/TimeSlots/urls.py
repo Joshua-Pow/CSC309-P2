@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import AllTimeSlotView, CreateTimeSlotView
+from .views import TimeSlotListCreateAPIView, TimeSlotRetrieveUpdateDestroyAPIView
 
 urlpatterns = [
-    path("all/", AllTimeSlotView.as_view(), name="all_timeslots"),
-    path("create/", CreateTimeSlotView.as_view(), name="create_timeslot")
+    path("", TimeSlotListCreateAPIView.as_view(), name="C_timeslot"),
+    path("<int:pk>/", TimeSlotRetrieveUpdateDestroyAPIView.as_view(), name="RUD_timeslot")
 ]
