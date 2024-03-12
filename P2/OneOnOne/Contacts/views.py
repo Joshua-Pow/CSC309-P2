@@ -20,10 +20,23 @@ class ContactViewSet(viewsets.ModelViewSet):
     #excludes blocked contacts (from either side) and contacts that already exist
     @action(detail=False, methods=['post'], url_path='add')
     def add(self, request):
+        """
+        Add a new contact to the user's contact list.
+        The user to be added is specified by their username.
+        The user cannot add themselves.
+        If the contact already exists, the request will be rejected.
+        If the contact is blocked, the request will be rejected.
+        If the contact is pending, the request will be rejected.
+        If the contact is already a friend, the request will be rejected.
+        If the user is not found, the request will be rejected.
+        If the user is found, the request will be accepted and the contact will be added to the user's contact list.
+        """
         userA = request.user
-        userB_username = request.data.get('username', None)
+        userB_username = request.data.get("username", None)
         if not userB_username:
-            return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
         userB = get_object_or_404(User, username=userB_username)
         if userA == userB:
             return Response({"error": "You cannot add yourself."}, status=status.HTTP_400_BAD_REQUEST)
@@ -52,43 +65,65 @@ class ContactViewSet(viewsets.ModelViewSet):
             elif contact.userB == user:
                 friend_ids.add(contact.userA_id)
         friends = User.objects.filter(id__in=friend_ids)
-        friends_cleaned = [{"id": friend.id, "username": friend.username} for friend in friends]
+        friends_cleaned = [
+            {"id": friend.id, "username": friend.username} for friend in friends
+        ]
         return Response(friends_cleaned)
     
     #get nicely formatted query of all of the logged in users incoming pending friend requests
     @action(detail=False, methods=['get'], url_path='incoming')
     def incoming(self, request):
+        """
+        Get a list of all incoming friend requests for the current user.
+        """
         user = request.user
         contacts = Contact.objects.filter(userB=user, status=2)
         #clean up data to easier to work with in frontend
         incoming_ids = [contact.userA_id for contact in contacts]
         incoming_users = User.objects.filter(id__in=incoming_ids)
-        incoming_cleaned = [{"id": user.id, "username": user.username} for user in incoming_users]
+        incoming_cleaned = [
+            {"id": user.id, "username": user.username} for user in incoming_users
+        ]
         return Response(incoming_cleaned)
     
     #get nicely formatted query of all of the logged in users outgoing pending friend requests
     @action(detail=False, methods=['get'], url_path='outgoing')
     def outgoing(self, request):
+        """
+        Get a list of all outgoing friend requests for the current user.
+        """
         user = request.user
         contacts = Contact.objects.filter(userA=user, status=2)
 
-        #clean up data to easier to work with in frontend
+        # clean up data to easier to work with in frontend
         incoming_ids = [contact.userB_id for contact in contacts]
         incoming_users = User.objects.filter(id__in=incoming_ids)
-        incoming_cleaned = [{"id": user.id, "username": user.username} for user in incoming_users]
+        incoming_cleaned = [
+            {"id": user.id, "username": user.username} for user in incoming_users
+        ]
         return Response(incoming_cleaned)
 
     #accept logged in users incoming friend request for a specific user
     #has a check to make sure there is a request from that user
     @action(detail=False, methods=['post'], url_path='accept')
     def accept(self, request):
-        userB_username = request.data.get('username', None)
+        """
+        Accept a friend request from another user.
+        """
+        userB_username = request.data.get("username", None)
         if not userB_username:
-            return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
         userBlookup = get_object_or_404(User, username=userB_username)
-        contact = Contact.objects.filter(userA=userBlookup, userB=request.user, status=2).first() # will only be one but errors if not a check to make sure its 1
+        contact = Contact.objects.filter(
+            userA=userBlookup, userB=request.user, status=2
+        ).first()  # will only be one but errors if not a check to make sure its 1
         if not contact:
-            return Response({"error": "No pending request from this user."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "No pending request from this user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         contact.status = 1
         contact.save()
         return Response({"message": "Friend request accepted."})
@@ -97,13 +132,23 @@ class ContactViewSet(viewsets.ModelViewSet):
     #has a check to make sure there is a request from that user
     @action(detail=False, methods=['post'], url_path='reject')
     def reject(self, request):
-        userB_username = request.data.get('username', None)
+        """
+        Reject a friend request from another user.
+        """
+        userB_username = request.data.get("username", None)
         if not userB_username:
-            return Response({"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Username is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
         userBlookup = get_object_or_404(User, username=userB_username)
-        contact = Contact.objects.filter(userA=userBlookup, userB=request.user, status=2).first() # will only be one but errors if not a check to make sure its 1
+        contact = Contact.objects.filter(
+            userA=userBlookup, userB=request.user, status=2
+        ).first()  # will only be one but errors if not a check to make sure its 1
         if not contact:
-            return Response({"error": "No pending request from this user."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "No pending request from this user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         contact.status = 3
         contact.save()
         return Response({"message": "Friend request rejected."})
