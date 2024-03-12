@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "Calendars",
     "drf_spectacular",
+    "Contacts",
 ]
 
 MIDDLEWARE = [
