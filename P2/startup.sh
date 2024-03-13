@@ -4,8 +4,7 @@
 sudo apt-get update
 
 # Install Python3 and pip if they are not installed
-sudo apt-get install -y python3.10 python3.10-venv python3.10-distutils python3.10-dev
-
+sudo apt-get install -y python3 python3-pip
 
 # Install virtualenv if not already installed
 pip3 install virtualenv
