@@ -4,7 +4,8 @@
 sudo apt-get update
 
 # Install Python3 and pip if they are not installed
-sudo apt-get install -y python3 python3-pip
+sudo apt-get install -y python3.10 python3.10-venv python3.10-distutils python3.10-dev
+
 
 # Install virtualenv if not already installed
 pip3 install virtualenv
@@ -25,10 +26,10 @@ sudo apt-get install -y libjpeg-dev zlib1g-dev
 cd ./OneOnOne
 
 # Make migrations for all Django apps
-./manage.py makemigrations Calendars
-./manage.py makemigrations Contacts
-./manage.py makemigrations Invitations
-./manage.py makemigrations TimeSlots
+python ./manage.py makemigrations Calendars
+python ./manage.py makemigrations Contacts
+python ./manage.py makemigrations Invitations
+python ./manage.py makemigrations TimeSlots
 
 # Run Django migrations
 ./manage.py migrate
