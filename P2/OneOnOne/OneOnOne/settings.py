@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+GRAPH_MODELS = {
+    "all_applications": True,
+    "group_models": True,
+}
 
 # Application definition
 
@@ -38,11 +42,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_extensions",
     "Calendars",
-    "drf_spectacular",
     "Contacts",
     "TimeSlots",
     "Invitations",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [

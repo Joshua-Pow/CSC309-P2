@@ -18,12 +18,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
-from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
+from drf_spectacular.views import SpectacularSwaggerView, SpectacularJSONAPIView
 
 
 urlpatterns = [
     path(
-        "schema/", SpectacularAPIView.as_view(), name="schema"
+        "schema/", SpectacularJSONAPIView.as_view(), name="schema"
     ),  # Outputs a YAML file with the API schema
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("admin/", admin.site.urls),
