@@ -1,17 +1,23 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema_view, OpenApiResponse, extend_schema
 from rest_framework import permissions
-from drf_spectacular.utils import OpenApiResponse
 from .serializers import TimeSlotSerializer
 from .models import TimeSlot
 from rest_framework import generics
-from Calendars.models import Day
+from Calendars.models import Day, Participant
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied
 
 
-@extend_schema(
-    methods=["post"],
-    request=TimeSlotSerializer,
+@extend_schema_view(
+    create=extend_schema(
+        description="Create a new time slot",
+        responses={201: OpenApiResponse(response=TimeSlotSerializer)},
+    ),
+    list=extend_schema(
+        description="List all timeslots",
+        request=None,
+        responses={200: OpenApiResponse(response=TimeSlotSerializer(many=True))},
+    ),
 )
 class TimeSlotListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -20,30 +26,37 @@ class TimeSlotListCreateAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         day_id = self.kwargs.get("day_id")
-        print(day_id)
         day = get_object_or_404(Day, id=day_id)
-        print(day)
-        print("user: ", self.request.user)
-        serializer.save(day=day, owner=self.request.user)
 
-    @extend_schema(
-        description="Create a new time slot",
-        responses={201: OpenApiResponse(response=TimeSlotSerializer)},
-    )
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        # Check if the user is a participant of the calendar
+        user = self.request.user
+        is_participant = Participant.objects.filter(
+            calendar=day.calendar, user=user
+        ).exists()
+        if not is_participant:
+            raise PermissionDenied(
+                "You must be a participant of the calendar to create a time slot."
+            )
 
-    @extend_schema(
-        description="List all timeslots",
-        responses={200: OpenApiResponse(response=TimeSlotSerializer(many=True))},
-    )
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        serializer.save(day=day, owner=user)
 
 
-@extend_schema(
-    methods=["get", "put", "delete"],
-    request=TimeSlotSerializer,
+@extend_schema_view(
+    get=extend_schema(
+        description="Retrieve a time slot",
+        request=None,
+        responses={200: OpenApiResponse(response=TimeSlotSerializer)},
+    ),
+    patch=extend_schema(
+        description="Update a time slot",
+        request=TimeSlotSerializer,
+        responses={200: OpenApiResponse(response=TimeSlotSerializer)},
+    ),
+    delete=extend_schema(
+        description="Delete a time slot",
+        request=None,
+        responses={204: OpenApiResponse(response=TimeSlotSerializer)},
+    ),
 )
 @extend_schema(
     methods=["patch"],
@@ -80,24 +93,3 @@ class TimeSlotRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView
                 "You do not have permission to delete this time slot."
             )
         instance.delete()
-
-    @extend_schema(
-        description="Retrieve a time slot",
-        responses={200: OpenApiResponse(response=TimeSlotSerializer)},
-    )
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    @extend_schema(
-        description="Update a time slot",
-        responses={204: OpenApiResponse(response=TimeSlotSerializer)},
-    )
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
-    @extend_schema(
-        description="Delete a time slot",
-        responses={204: OpenApiResponse(response=TimeSlotSerializer)},
-    )
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)

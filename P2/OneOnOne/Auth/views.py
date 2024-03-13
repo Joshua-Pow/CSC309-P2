@@ -3,21 +3,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.decorators import permission_classes
 from drf_spectacular.utils import OpenApiResponse
 
 
-@extend_schema(
-    methods=["post"],
-    request=UserSerializer,
-    description="Register a new user",
-    responses={
-        status.HTTP_201_CREATED: OpenApiResponse(
-            description="User created successfully"
-        ),
-        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Invalid data"),
-    },
+@extend_schema_view(
+    post=extend_schema(
+        description="Register a new user",
+        request=UserSerializer,
+        responses={201: OpenApiResponse(description="User created successfully")},
+    ),
 )
 @permission_classes([permissions.AllowAny])
 class RegisterUserAPIView(APIView):

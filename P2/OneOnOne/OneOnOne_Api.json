@@ -124,9 +124,6 @@
                 "responses": {
                     "201": {
                         "description": "User created successfully"
-                    },
-                    "400": {
-                        "description": "Invalid data"
                     }
                 }
             }
@@ -175,17 +172,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Calendar"
+                                "$ref": "#/components/schemas/CalendarCreate"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/Calendar"
+                                "$ref": "#/components/schemas/CalendarCreate"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/Calendar"
+                                "$ref": "#/components/schemas/CalendarCreate"
                             }
                         }
                     },
@@ -201,7 +198,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Calendar"
+                                    "$ref": "#/components/schemas/CalendarCreate"
                                 }
                             }
                         },
@@ -497,6 +494,7 @@
         "/calendars/{calendar_id}/invitations/": {
             "get": {
                 "operationId": "calendars_invitations_list",
+                "description": "Retrieve all invitations for a calendar",
                 "parameters": [
                     {
                         "in": "path",
@@ -539,6 +537,7 @@
             },
             "post": {
                 "operationId": "calendars_invitations_create",
+                "description": "Create an invitation",
                 "parameters": [
                     {
                         "in": "path",
@@ -556,20 +555,21 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Invitation"
+                                "$ref": "#/components/schemas/InvitationCreate"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/Invitation"
+                                "$ref": "#/components/schemas/InvitationCreate"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/Invitation"
+                                "$ref": "#/components/schemas/InvitationCreate"
                             }
                         }
-                    }
+                    },
+                    "required": true
                 },
                 "security": [
                     {
@@ -790,17 +790,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Calendar"
+                                "$ref": "#/components/schemas/CalendarEdit"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/Calendar"
+                                "$ref": "#/components/schemas/CalendarEdit"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/Calendar"
+                                "$ref": "#/components/schemas/CalendarEdit"
                             }
                         }
                     },
@@ -816,7 +816,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Calendar"
+                                    "$ref": "#/components/schemas/CalendarEdit"
                                 }
                             }
                         },
@@ -1523,6 +1523,62 @@
                     "title"
                 ]
             },
+            "CalendarCreate": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "days": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Day"
+                        }
+                    }
+                },
+                "required": [
+                    "days",
+                    "description",
+                    "id",
+                    "title"
+                ]
+            },
+            "CalendarEdit": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "days": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Day"
+                        }
+                    }
+                },
+                "required": [
+                    "days",
+                    "description",
+                    "id",
+                    "title"
+                ]
+            },
             "Contact": {
                 "type": "object",
                 "properties": {
@@ -1628,6 +1684,22 @@
                     "id",
                     "invitee_username",
                     "inviter_username"
+                ]
+            },
+            "InvitationCreate": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "invitee_username": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "invitee_username"
                 ]
             },
             "InvitationEdit": {
