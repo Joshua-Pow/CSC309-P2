@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Need to allow ./run.sh to be executable
+chmod +x run.sh
+
 # Update system package index
 sudo apt-get update
 
