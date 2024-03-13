@@ -1,5 +1,9 @@
 from django.urls import path
-from .views import CalendarListCreateAPIView, CalendarRetrieveUpdateDestroyAPIView
+from .views import (
+    CalendarListCreateAPIView,
+    CalendarRetrieveUpdateDestroyAPIView,
+)
+from Invitations.views import InvitationListCreateAPIView, InvitationChangeStatusAPIView
 from TimeSlots.views import (
     TimeSlotListCreateAPIView,
     TimeSlotRetrieveUpdateDestroyAPIView,
@@ -21,5 +25,15 @@ urlpatterns = [
         "<int:calendar_id>/day/<int:day_id>/timeslot/<int:pk>/",
         TimeSlotRetrieveUpdateDestroyAPIView.as_view(),
         name="timeslot_detail",
+    ),
+    path(
+        "<int:calendar_id>/invitations/",
+        InvitationListCreateAPIView.as_view(),
+        name="invitations_list_create",
+    ),
+    path(
+        "<int:calendar_id>/invitations/<int:pk>/",
+        InvitationChangeStatusAPIView.as_view(),
+        name="invitations_update_delete",
     ),
 ]
