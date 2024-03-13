@@ -31,7 +31,7 @@ python ./manage.py makemigrations Invitations
 python ./manage.py makemigrations TimeSlots
 
 # Run Django migrations
-./manage.py migrate
+python ./manage.py migrate
 
 # Deactivate the virtual environment
 deactivate
