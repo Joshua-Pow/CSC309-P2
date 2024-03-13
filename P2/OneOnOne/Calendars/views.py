@@ -47,16 +47,6 @@ class CalendarRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView
     serializer_class = CalendarSerializer
     queryset = Calendar.objects.all()
 
-    def get_queryset(self):
-        """
-        This view returns a list of all the calendars for the currently authenticated user.
-        """
-        user = self.request.user
-        if user.is_authenticated:
-            return Calendar.objects.filter(creator=user)
-        else:
-            raise PermissionDenied("You do not have permission to view this calendar.")
-
     def update(self, request, *args, **kwargs):
         calendar = self.get_object()
         if calendar.creator != request.user:

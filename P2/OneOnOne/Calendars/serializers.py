@@ -1,18 +1,41 @@
 from rest_framework import serializers
-from .models import Calendar, Day
+from .models import Calendar, Day, Participant
+from TimeSlots.serializers import TimeSlotSerializer
+from django.contrib.auth.models import User
+
+
+class ParticipantSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Participant
+        fields = ["id", "username"]
+
+    def get_username(self, obj):
+        return obj.user.username
 
 
 class DaySerializer(serializers.ModelSerializer):
+    timeslots = TimeSlotSerializer(many=True, read_only=True)
+
     class Meta:
         model = Day
-        fields = ["id", "date", "ranking"]
+        fields = ["id", "date", "ranking", "timeslots"]
 
 
 class CalendarSerializer(serializers.ModelSerializer):
     days = DaySerializer(many=True)
+    creator_username = serializers.SerializerMethodField()
+    participants = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), many=True, required=False, allow_null=True
+    )
+
+    def get_creator_username(self, obj) -> str:
+        return obj.creator.username
 
     def create(self, validated_data):
         days_data = validated_data.pop("days")
+        validated_data.pop("participants", None)
         calendar = Calendar.objects.create(**validated_data)
         for day_data in days_data:
             Day.objects.create(calendar=calendar, **day_data)
@@ -40,4 +63,11 @@ class CalendarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Calendar
-        fields = ["id", "title", "description", "days"]
+        fields = [
+            "id",
+            "creator_username",
+            "title",
+            "description",
+            "days",
+            "participants",
+        ]
