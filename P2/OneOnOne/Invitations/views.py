@@ -38,6 +38,10 @@ class InvitationListCreateAPIView(generics.ListCreateAPIView):
     def get_queryset(self):
         calendar_id = self.kwargs.get("calendar_id")
         calendar = get_object_or_404(Calendar, id=calendar_id)
+        if calendar.creator != self.request.user:
+            raise PermissionDenied(
+                "You do not have permission to view these invitations."
+            )
         return Invitation.objects.filter(calendar=calendar)
 
     def perform_create(self, serializer):
@@ -108,7 +112,7 @@ class InvitationChangeStatusAPIView(generics.RetrieveUpdateDestroyAPIView):
         else:
             if serializer.validated_data["status"] == "accepted":
                 invitation.status = "accepted"
-                invitation.save()
+                serializer.save()
 
                 # Add invitee as a participant to the calendar
                 Participant.objects.create(
@@ -116,8 +120,8 @@ class InvitationChangeStatusAPIView(generics.RetrieveUpdateDestroyAPIView):
                 )
             else:
                 invitation.status = "rejected"
-                invitation.save()
-                return invitation
+                serializer.save()
+        return invitation
 
     def destroy(self, request, *args, **kwargs):
         invitation = self.get_object()

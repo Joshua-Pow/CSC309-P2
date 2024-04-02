@@ -9,7 +9,7 @@ from drf_spectacular.utils import (
 
 
 class InvitationCreateSerializer(serializers.ModelSerializer):
-    invitee_username = serializers.CharField(required=True)
+    invitee_username = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = Invitation
@@ -17,6 +17,33 @@ class InvitationCreateSerializer(serializers.ModelSerializer):
             "id",
             "invitee_username",
         ]
+
+    def create(self, validated_data):
+        invitee_username = validated_data.pop("invitee_username")
+        invitee = get_object_or_404(User, username=invitee_username)
+        calendar = validated_data["calendar"]
+
+        # Check if the current user is the creator of the calendar
+        if validated_data["inviter"] != calendar.creator:
+            raise PermissionDenied("Only the calendar creator can send invitations.")
+        # Check if the invitee is the same as the inviter
+        if calendar.creator == invitee:
+            raise PermissionDenied("You cannot send an invitation to yourself.")
+
+        # Check if an invitation already exists with statuses 'accepted' or 'rejected'
+        calendar_id = (
+            self.context["request"].parser_context["kwargs"].get("calendar_id")
+        )
+        if Invitation.objects.filter(
+            invitee=invitee, calendar_id=calendar_id, status__in=["accepted", "pending"]
+        ).exists():
+            raise serializers.ValidationError(
+                "An invitation has already been sent to that users."
+            )
+
+        print(validated_data)
+        invitation = Invitation.objects.create(**validated_data, invitee=invitee)
+        return invitation
 
 
 class InvitationEditSerializer(serializers.ModelSerializer):
@@ -55,33 +82,6 @@ class InvitationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("User does not exist")
 
         return user
-
-    def create(self, validated_data):
-        invitee_username = validated_data.pop("invitee_username")
-        invitee = get_object_or_404(User, username=invitee_username)
-        calendar = validated_data["calendar"]
-
-        # Check if the current user is the creator of the calendar
-        if validated_data["inviter"] != calendar.creator:
-            raise PermissionDenied("Only the calendar creator can send invitations.")
-        # Check if the invitee is the same as the inviter
-        if calendar.creator == invitee:
-            raise PermissionDenied("You cannot send an invitation to yourself.")
-
-        # Check if an invitation already exists with statuses 'accepted' or 'rejected'
-        calendar_id = (
-            self.context["request"].parser_context["kwargs"].get("calendar_id")
-        )
-        if Invitation.objects.filter(
-            invitee=invitee, calendar_id=calendar_id, status__in=["accepted", "pending"]
-        ).exists():
-            raise serializers.ValidationError(
-                "An invitation has already been sent to that users."
-            )
-
-        print(validated_data)
-        invitation = Invitation.objects.create(**validated_data, invitee=invitee)
-        return invitation
 
     # def update(self, instance, validated_data):
     #     print(validated_data)
